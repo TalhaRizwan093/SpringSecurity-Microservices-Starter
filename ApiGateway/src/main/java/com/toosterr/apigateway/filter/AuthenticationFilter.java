@@ -1,5 +1,6 @@
 package com.toosterr.apigateway.filter;
 
+import com.toosterr.apigateway.exception.user.UnauthorizedUser;
 import com.toosterr.apigateway.util.JwtUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -19,23 +20,18 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     }
 
     @Override
-    public GatewayFilter apply(AuthenticationFilter.Config config) {
+    public GatewayFilter apply(AuthenticationFilter.Config config) throws RuntimeException {
         return ((exchange, chain) -> {
             if (validator.isSecured.test(exchange.getRequest())) {
                 if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-                    throw new RuntimeException("missing authorization header");
+                    throw new UnauthorizedUser("missing authorization header");
                 }
 
                 String authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
                     authHeader = authHeader.substring(7);
                 }
-                try {
-                    jwtUtil.validateToken(authHeader);
-                } catch (Exception e) {
-                    System.out.println("invalid access...!");
-                    throw new RuntimeException("un authorized access to application");
-                }
+                jwtUtil.validateToken(authHeader);
             }
             return chain.filter(exchange);
         });
