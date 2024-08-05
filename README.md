@@ -14,6 +14,8 @@ In this section we will dive deep into the springboot security in Microservices 
 - The authentication service is responsible for the actual authentication and is the copy of [SpringSecurityOAuthJWT](https://github.com/TalhaRizwan093/Springboot-Security-Starter-OAuth-JWT "repo").
 - It has login and register endpoints which are responsible for registeration and giving JWT tokens.
 
+![Microservice Auth Architecture](https://github.com/user-attachments/assets/1a002306-3f24-4d29-8868-3b0e2e304d09)
+
 ### Spinning up the backend
 
 Before building and running the backend we have to ensure that the application properties files has setup correctly and accordingly.
