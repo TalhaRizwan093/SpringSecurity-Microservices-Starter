@@ -1,19 +1,16 @@
-package com.toosterr.apigateway.util;
+package com.toosterr.productservice.util;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-
-import java.security.Key;
-import java.util.*;
+import java.util.Base64;
 
 
 @Component
@@ -22,13 +19,10 @@ public class JwtUtil {
     @Value("${security.jwt.token.secret-key:secret}")
     private String secretKey;
 
-    @Value("${security.jwt.token.secret-key-api-gateway:secret}")
-    private String gatewayKey;
 
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        gatewayKey = Base64.getEncoder().encodeToString(gatewayKey.getBytes());
     }
 
     public boolean validateToken(String token) {
@@ -48,21 +42,12 @@ public class JwtUtil {
         }
     }
 
-    public String createToken() {
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + 60000);
-
-        return Jwts.builder()
-                .setSubject("api_gateway")
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(gatewayKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    public String resolveToken(HttpServletRequest req) {
+        String bearerToken = req.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 
 }

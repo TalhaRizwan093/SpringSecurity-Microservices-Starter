@@ -24,18 +24,28 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         return ((exchange, chain) -> {
             if (validator.isSecured.test(exchange.getRequest())) {
                 if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-                    throw new UnauthorizedUser("missing authorization header");
+                    throw new UnauthorizedUser("Missing authorization header");
                 }
 
                 String authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
                     authHeader = authHeader.substring(7);
+                } else {
+                    throw new UnauthorizedUser("Invalid authorization header format");
                 }
+
                 jwtUtil.validateToken(authHeader);
+
+                String newToken = jwtUtil.createToken();
+
+                exchange.getRequest().mutate()
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + newToken)
+                        .build();
             }
             return chain.filter(exchange);
         });
     }
+
 
     public static class Config {}
 }
