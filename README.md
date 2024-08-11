@@ -13,6 +13,10 @@ In this section we will dive deep into the springboot security in Microservices 
 - If the token is not valid our global exception handler will catch the unauthorized exception and send the response.
 - The authentication service is responsible for the actual authentication and is the copy of [SpringSecurityOAuthJWT](https://github.com/TalhaRizwan093/Springboot-Security-Starter-OAuth-JWT "repo").
 - It has login and register endpoints which are responsible for registeration and giving JWT tokens.
+- If someone directly trys to access the service the service wont allow the request as it only accepts request from the API Gateway.
+- This is handled by JWT token which is generated be the API Gateway with a security key that the Services knows.
+- So when the request is sent from API Gateway it is first verified that it has valid JWT token.
+- Only then the request will be handled and give a valid response
 
 ![Microservice Auth Architecture](https://github.com/user-attachments/assets/1a002306-3f24-4d29-8868-3b0e2e304d09)
 
